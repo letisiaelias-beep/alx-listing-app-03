@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "id": 1,
+      "title": "Cozy 1BR in Nairobi",
+      "location": "Westlands, Nairobi",
+      "price": 4500,
+      "images": [],
+      "beds": 1,
+      "baths": 1
+    },
+    {
+      "id": 2,
+      "title": "Family House, Karen",
+      "location": "Karen, Nairobi",
+      "price": 12000,
+      "images": [],
+      "beds": 3,
+      "baths": 2
+    }
+  ]
+}
