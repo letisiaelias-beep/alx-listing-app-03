@@ -1,29 +1,65 @@
-import { PROPERTYLISTINGSAMPLE } from "@/constants";
-import { PropertyProps } from "@/interfaces";
+// pages/index.tsx
+import { useEffect, useState } from "react";
+import type { NextPage } from "next";
+import PropertyCard from "@/components/property/PropertyCard";
+import api from "@/lib/api";
 
-export default function Home() {
+type Property = {
+  id: string | number;
+  title: string;
+  location?: string;
+  price?: number;
+  images?: string[];
+  beds?: number;
+  baths?: number;
+  summary?: string;
+  [key: string]: any;
+};
+
+const Home: NextPage = () => {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchProperties = async () => {
+      try {
+        const res = await api.get<Property[]>("/properties");
+        if (!cancelled) setProperties(res.data || []);
+      } catch (err) {
+        console.error("Error fetching properties:", err);
+        if (!cancelled) setError("Unable to load properties. Try again later.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchProperties();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) return <p className="p-6">Loading properties...</p>;
+  if (error) return <p className="p-6 text-red-600">{error}</p>;
+
   return (
-    <div>
-      {/* Hero Section */}
-      <section
-        className="h-64 bg-cover bg-center flex flex-col items-center justify-center text-white"
-        style={{ backgroundImage: "url('https://example.com/hero.jpg')" }}
-      >
-        <h1 className="text-3xl font-bold">Find your favorite place here!</h1>
-        <p>The best prices for over 2 million properties worldwide.</p>
-      </section>
+    <main className="p-6">
+      <h1 className="text-2xl font-semibold mb-4">Properties</h1>
 
-      {/* Listing Section */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-        {PROPERTYLISTINGSAMPLE.map((property: PropertyProps, index: number) => (
-          <div key={index} className="border rounded p-4 shadow hover:shadow-lg">
-            <img src={property.image} alt={property.name} className="w-full h-40 object-cover rounded" />
-            <h2 className="font-bold mt-2">{property.name}</h2>
-            <p>${property.price}/night</p>
-            <p>⭐ {property.rating}</p>
-          </div>
-        ))}
-      </section>
-    </div>
+      {properties.length === 0 ? (
+        <p>No properties found.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {properties.map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
+        </div>
+      )}
+    </main>
   );
-}
+};
+
+export default Home;
